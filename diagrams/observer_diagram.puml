@@ -1,0 +1,63 @@
+@startuml observer_diagram
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam class {
+    BackgroundColor #EAF2FF
+    BorderColor #2E4D8A
+    ArrowColor #2E4D8A
+    HeaderBackgroundColor #4472C4
+    FontColor #FFFFFF
+    AttributeFontColor #111111
+}
+skinparam interface {
+    BackgroundColor #FFF0E0
+    BorderColor #C0550A
+    ArrowColor #C0550A
+    HeaderBackgroundColor #C0550A
+    FontColor #FFFFFF
+}
+
+title Патерн Observer (Behavioral) — KitchenNotifier
+
+class KitchenNotifier <<Publisher>> {
+    - observers : List<OrderObserver>
+    + subscribe(o : OrderObserver) : void
+    + unsubscribe(o : OrderObserver) : void
+    + notifyObservers(order : Order) : void
+    + getObserverCount() : int
+}
+
+interface OrderObserver <<Subscriber>> {
+    + onOrderPlaced(order : Order) : void
+}
+
+class ConsoleKitchenObserver {
+    - receivedOrders : List<Order>
+    + onOrderPlaced(order : Order) : void
+    + getReceivedOrders() : List<Order>
+    + hasReceived(order : Order) : boolean
+}
+
+class RestaurantService {
+    - kitchenNotifier : KitchenNotifier
+    --
+    + placeOrder(c : Customer, d : List<Dish>) : Order
+}
+
+note right of KitchenNotifier
+  **Переваги Observer:**
+  • RestaurantService не знає про
+    ConsoleKitchenObserver
+  • Новий канал = новий клас,
+    існуючий код не змінюється (OCP)
+  • KitchenNotifier залежить лише
+    від інтерфейсу OrderObserver
+end note
+
+KitchenNotifier       o-->  "0..*" OrderObserver     : observers
+ConsoleKitchenObserver ..|> OrderObserver
+RestaurantService      -->  KitchenNotifier           : notifyObservers()
+
+@enduml

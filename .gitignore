@@ -1,0 +1,10 @@
+target/
+*.class
+*.log
+*.iml
+.idea/
+.vscode/
+*.docx
+*.pdf
+diagrams/generate_diagrams.py
+generate_report.py

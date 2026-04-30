@@ -1,0 +1,48 @@
+@startuml singleton_diagram
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam class {
+    BackgroundColor #F5EEFF
+    BorderColor #7B3FA0
+    ArrowColor #7B3FA0
+    HeaderBackgroundColor #7B3FA0
+    FontColor #FFFFFF
+    AttributeFontColor #111111
+}
+
+title Патерн Singleton — OrderDatabase
+
+class OrderDatabase {
+    - {static} instance : OrderDatabase
+    - orders : List<Order>
+    --
+    - OrderDatabase()
+    + {static} getInstance() : OrderDatabase
+    + saveOrder(order : Order) : void
+    + getAllOrders() : List<Order>
+    + getOrderCount() : int
+    + clear() : void
+}
+
+class RestaurantService {
+    - orderFactory : OrderFactory
+    - orderDatabase : OrderDatabase
+    --
+    + RestaurantService(f, n)
+    + placeOrder(c, d) : Order
+}
+
+note right of OrderDatabase
+  **Ключові властивості:**
+  • private конструктор — new заборонено
+  • static instance — єдиний об'єкт у JVM
+  • synchronized getInstance() — thread-safe
+  • assertSame(db1, db2) — тест підтверджує
+end note
+
+RestaurantService ..> OrderDatabase : getInstance()
+OrderDatabase --> OrderDatabase : instance
+
+@enduml

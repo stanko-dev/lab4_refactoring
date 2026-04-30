@@ -1,0 +1,65 @@
+@startuml factory_diagram
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam class {
+    BackgroundColor #EDF9ED
+    BorderColor #507E32
+    ArrowColor #507E32
+    HeaderBackgroundColor #507E32
+    FontColor #FFFFFF
+    AttributeFontColor #111111
+}
+skinparam interface {
+    BackgroundColor #FFF0E0
+    BorderColor #C0550A
+    ArrowColor #C0550A
+    HeaderBackgroundColor #C0550A
+    FontColor #FFFFFF
+}
+
+title Патерн Factory (Method) — OrderFactory
+
+interface OrderFactory {
+    + createOrder(id : int, c : Customer, d : List<Dish>) : Order
+}
+
+class RegularOrderFactory {
+    + createOrder(id : int, c : Customer, d : List<Dish>) : Order
+}
+
+class BulkOrderFactory {
+    + createOrder(id : int, c : Customer, d : List<Dish>) : Order
+}
+
+class Order <<Product>> {
+    - id : int
+    - customer : Customer
+    - dishes : List<Dish>
+    - type : OrderType
+    - status : OrderStatus
+    + getTotalPrice() : double
+}
+
+class RestaurantService {
+    - orderFactory : OrderFactory
+    --
+    + placeOrder(c : Customer, d : List<Dish>) : Order
+}
+
+note bottom of OrderFactory
+  **Переваги Factory:**
+  • OrderFactory — інтерфейс, не клас
+  • Нема if-else для вибору типу
+  • Два окремі класи-реалізатори
+  • RestaurantService залежить
+    від абстракції (DIP)
+end note
+
+RegularOrderFactory ..|> OrderFactory
+BulkOrderFactory    ..|> OrderFactory
+OrderFactory        ..>  Order          : <<creates>>
+RestaurantService   -->  OrderFactory   : uses
+
+@enduml

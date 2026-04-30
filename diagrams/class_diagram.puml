@@ -1,0 +1,146 @@
+@startuml class_diagram
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam class {
+    BackgroundColor #EAF2FF
+    BorderColor #2E4D8A
+    ArrowColor #2E4D8A
+    HeaderBackgroundColor #4472C4
+    FontColor #FFFFFF
+    AttributeFontColor #111111
+    StereotypeFontColor #FFFFFF
+}
+skinparam package {
+    BackgroundColor #F8F8FF
+    BorderColor #999999
+}
+
+package "model" {
+    class Dish {
+        - name : String
+        - price : double
+        + getName() : String
+        + getPrice() : double
+    }
+
+    class Menu {
+        - dishes : List<Dish>
+        + addDish(dish : Dish) : void
+        + containsDish(dish : Dish) : boolean
+        + getDishes() : List<Dish>
+        + isEmpty() : boolean
+        + size() : int
+    }
+
+    class Customer {
+        - id : int
+        - name : String
+        + getId() : int
+        + getName() : String
+    }
+
+    class Order {
+        - id : int
+        - customer : Customer
+        - dishes : List<Dish>
+        - type : OrderType
+        - status : OrderStatus
+        + getCustomer() : Customer
+        + getDishes() : List<Dish>
+        + getStatus() : OrderStatus
+        + setStatus(s : OrderStatus) : void
+        + getTotalPrice() : double
+    }
+
+    enum OrderType {
+        REGULAR
+        BULK
+    }
+
+    enum OrderStatus {
+        PENDING
+        CONFIRMED
+        COMPLETED
+        CANCELLED
+    }
+}
+
+package "observer" {
+    interface OrderObserver {
+        + onOrderPlaced(order : Order) : void
+    }
+
+    class KitchenNotifier {
+        - observers : List<OrderObserver>
+        + subscribe(o : OrderObserver) : void
+        + unsubscribe(o : OrderObserver) : void
+        + notifyObservers(order : Order) : void
+        + getObserverCount() : int
+    }
+
+    class ConsoleKitchenObserver {
+        - receivedOrders : List<Order>
+        + onOrderPlaced(order : Order) : void
+        + getReceivedOrders() : List<Order>
+        + hasReceived(order : Order) : boolean
+    }
+}
+
+package "factory" {
+    interface OrderFactory {
+        + createOrder(id : int, c : Customer, d : List<Dish>) : Order
+    }
+
+    class RegularOrderFactory {
+        + createOrder(id : int, c : Customer, d : List<Dish>) : Order
+    }
+
+    class BulkOrderFactory {
+        + createOrder(id : int, c : Customer, d : List<Dish>) : Order
+    }
+}
+
+package "singleton" {
+    class OrderDatabase {
+        - {static} instance : OrderDatabase
+        - orders : List<Order>
+        - OrderDatabase()
+        + {static} getInstance() : OrderDatabase
+        + saveOrder(order : Order) : void
+        + getAllOrders() : List<Order>
+        + getOrderCount() : int
+        + clear() : void
+    }
+}
+
+package "service" {
+    class RestaurantService {
+        - orderFactory : OrderFactory
+        - kitchenNotifier : KitchenNotifier
+        - orderDatabase : OrderDatabase
+        - nextOrderId : int
+        + RestaurantService(f : OrderFactory, n : KitchenNotifier)
+        + placeOrder(c : Customer, d : List<Dish>) : Order
+        + getNextOrderId() : int
+    }
+}
+
+Menu "1" o-- "0..*" Dish
+Order "1" *-- "1" Customer
+Order "1" *-- "1..*" Dish
+Order --> OrderType
+Order --> OrderStatus
+
+KitchenNotifier o-- "0..*" OrderObserver
+ConsoleKitchenObserver ..|> OrderObserver
+
+RegularOrderFactory ..|> OrderFactory
+BulkOrderFactory ..|> OrderFactory
+
+RestaurantService --> OrderFactory
+RestaurantService --> KitchenNotifier
+RestaurantService --> OrderDatabase
+
+@enduml
