@@ -4,18 +4,14 @@ import com.restaurant.model.*;
 import com.restaurant.singleton.OrderDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.lang.reflect.Method;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrderDatabaseTest {
 
     @BeforeEach
-    void resetSingleton() throws Exception {
-        Method reset = OrderDatabase.class.getDeclaredMethod("resetInstance");
-        reset.setAccessible(true);
-        reset.invoke(null);
-        OrderDatabase.getInstance().clear();
+    void resetSingleton() {
+        OrderDatabase.resetForTesting();
     }
 
     @Test
@@ -32,8 +28,7 @@ class OrderDatabaseTest {
 
     @Test
     void testSaveOrder() {
-        Order order = makeOrder(1);
-        OrderDatabase.getInstance().saveOrder(order);
+        OrderDatabase.getInstance().saveOrder(makeOrder(1));
         assertEquals(1, OrderDatabase.getInstance().getOrderCount());
     }
 

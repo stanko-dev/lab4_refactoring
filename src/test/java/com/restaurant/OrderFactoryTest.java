@@ -75,4 +75,18 @@ class OrderFactoryTest {
         Order bulk = new BulkOrderFactory().createOrder(2, customer, dishes);
         assertNotEquals(regular.getType(), bulk.getType());
     }
+
+    @Test
+    void testBulkOrderAppliesDiscount() {
+        Order order = new BulkOrderFactory().createOrder(
+                1, customer, List.of(new Dish("Піца", 200.0)));
+        assertEquals(180.0, order.getTotalPrice(), 0.001);
+    }
+
+    @Test
+    void testRegularOrderHasNoDiscount() {
+        Order order = new RegularOrderFactory().createOrder(
+                1, customer, List.of(new Dish("Піца", 200.0)));
+        assertEquals(200.0, order.getTotalPrice(), 0.001);
+    }
 }

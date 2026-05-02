@@ -35,8 +35,7 @@ public class OrderDatabase {
         orders.clear();
     }
 
-    // Лише для тестування — скидання екземпляра
-    static synchronized void resetInstance() {
+    public static synchronized void resetForTesting() {
         instance = null;
     }
 }

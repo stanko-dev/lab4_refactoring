@@ -29,7 +29,11 @@ public class Order {
     public void setStatus(OrderStatus status) { this.status = status; }
 
     public double getTotalPrice() {
-        return dishes.stream().mapToDouble(Dish::getPrice).sum();
+        double total = dishes.stream().mapToDouble(Dish::getPrice).sum();
+        if (type == OrderType.BULK) {
+            return Math.round(total * 0.9 * 100.0) / 100.0;
+        }
+        return total;
     }
 
     @Override

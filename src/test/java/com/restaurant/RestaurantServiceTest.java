@@ -1,5 +1,6 @@
 package com.restaurant;
 
+import com.restaurant.factory.BulkOrderFactory;
 import com.restaurant.factory.RegularOrderFactory;
 import com.restaurant.model.*;
 import com.restaurant.observer.ConsoleKitchenObserver;
@@ -8,7 +9,6 @@ import com.restaurant.service.RestaurantService;
 import com.restaurant.singleton.OrderDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.lang.reflect.Method;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,16 +20,14 @@ class RestaurantServiceTest {
     private List<Dish> dishes;
 
     @BeforeEach
-    void setUp() throws Exception {
-        Method reset = OrderDatabase.class.getDeclaredMethod("resetInstance");
-        reset.setAccessible(true);
-        reset.invoke(null);
-        OrderDatabase.getInstance().clear();
+    void setUp() {
+        OrderDatabase.resetForTesting();
 
         kitchenObserver = new ConsoleKitchenObserver();
         KitchenNotifier notifier = new KitchenNotifier();
         notifier.subscribe(kitchenObserver);
-        service = new RestaurantService(new RegularOrderFactory(), notifier, OrderDatabase.getInstance());
+        service = new RestaurantService(
+                new RegularOrderFactory(), notifier, OrderDatabase.getInstance());
         customer = new Customer(1, "Тест");
         dishes = List.of(new Dish("Піца", 150.0));
     }
@@ -61,11 +59,21 @@ class RestaurantServiceTest {
 
     @Test
     void testPlaceOrderNullCustomerThrows() {
-        assertThrows(IllegalArgumentException.class, () -> service.placeOrder(null, dishes));
+        assertThrows(IllegalArgumentException.class,
+                () -> service.placeOrder(null, dishes));
     }
 
     @Test
     void testPlaceOrderEmptyDishesThrows() {
-        assertThrows(IllegalArgumentException.class, () -> service.placeOrder(customer, List.of()));
+        assertThrows(IllegalArgumentException.class,
+                () -> service.placeOrder(customer, List.of()));
+    }
+
+    @Test
+    void testBulkServiceAppliesDiscount() {
+        RestaurantService bulk = new RestaurantService(
+                new BulkOrderFactory(), new KitchenNotifier(), OrderDatabase.getInstance());
+        Order order = bulk.placeOrder(customer, List.of(new Dish("Піца", 200.0)));
+        assertEquals(180.0, order.getTotalPrice(), 0.001);
     }
 }
